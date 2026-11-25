@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 48 / 94 / 197) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -78,7 +78,7 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    (FormalConjecturesForMathlib/Combinatorics/SimpleGraph/Domination.lean) never requires the set M to
    consist of edges of G. For K₃,₃, M = {s(a₁,a₂), s(a₃,b₁)} is accepted, giving 2 instead of the true value 3.
    The definition is unused so far, and a search of issues and PRs found no report of it.
-   See `ISSUE_formal_conjectures.md`. (TxGraffiti Conjecture 3 still being marked "open" there is already
+   Filed as google-deepmind/formal-conjectures#8290 (text in `ISSUE_formal_conjectures.md`). (TxGraffiti Conjecture 3 still being marked "open" there is already
    reported: issue #6737, PR #7661.) `EdgeDomBugDemo.lean` proves `edgeDominationNumber K₃,₃ ≤ 2` against
    the repository itself (commit `9097e2f`, Lean v4.33.1) using only the standard axioms, and compares it
    with the library's own `saturationNumber K₃,₃ = 3` (that step uses `native_decide`).
@@ -130,9 +130,126 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
        n = 11, 13, 15, 17; a 2-clause and three 3-clauses: 39, 227, 684 at n = 11, 14, 17; two 2-clauses and a
        3-clause: 24, 117 at n = 11, 14. With exactly three 3-clauses: 205 to 1,897 models at n = 12 to 16.
      - Exact counterexample-guided search over blocks with a cyclic symmetry (the short clauses forming one
-       orbit), `cegar_sym2.py`: no Z₅-symmetric block with 10 variables and 15 clauses, no Z₄-symmetric block
-       with 12 variables and 16 clauses. Larger symmetric cases (up to 30 variables) were still running on the
-       Mac when this was written.
+       orbit), `cegar_sym2.py`: no Z₅-symmetric block with 10 variables and 15 clauses, none with 15 variables
+       and 20 clauses, and no Z₄-symmetric block with 12 variables and 16 clauses. Larger symmetric cases (up to
+       30 variables) were still running on the Mac when this was written.
+     - Circulant (4,3,3)-formulas with two variable orbits and three clause orbits (every literal exactly 3
+       times) are all satisfiable, for an easy reason: on assignments that are constant on each orbit the
+       formula collapses to three clauses over two orbit-variables, which cannot be unsatisfiable. The same
+       "quotient" argument explains why symmetric searches need many orbits.
+
+7. **Slightly larger verified ranges for degrees 4, 5, 6 (rigorous, elementary).** Gupta's reduction succeeds
+   whenever the formula it produces is satisfiable. He guarantees this when the formula has at most 2^Δ − 1
+   clauses (union bound). One more clause is free: an unsatisfiable formula with exactly 2^Δ clauses of width Δ
+   would need its falsified subcubes to tile the cube exactly, so every two clauses would clash. But with every
+   literal occurring at most Δ − 1 times, a clause clashes with at most Δ(Δ − 1) others, and
+   Δ(Δ − 1) < 2^Δ − 1 for Δ ≥ 4. For Δ = 6 one more clause is free: restrict a 65-clause formula to the 6
+   variables of any clause C. The 64 restricted Kraft sums add up to 65 and are each ≥ 1. The restriction that
+   falsifies C contains the empty clause and at least 34 surviving clauses, so it exceeds 1 by ≥ 34/64. Every
+   other restriction keeps ≥ 35 clauses that each clash with ≤ 30 others, so it cannot tile and exceeds 1 by
+   ≥ 1/64. That totals ≥ 97/64 > 1, a contradiction. With the integer form of Gupta's bound
+   |M| ≥ ⌈Δn/(4Δ − 2)⌉ this gives **Δ = 4: all graphs with n ≤ 40 (was 37); Δ = 5: n ≤ 76 (was 70);
+   Δ = 6: n ≤ 145 (was 140)** (`ranges.py` reproduces Gupta's 48 / 37 / 70 and computes the new values; for
+   Δ = 6 the union bound alone already gives 141 with exact rounding). The same restriction trick does not
+   settle 17 clauses for Δ = 4 or 33 for Δ = 5, because there the restricted formulas are small enough that
+   tiling cannot be ruled out by counting. A further observation for Δ = 4: in an unsatisfiable formula of this
+   kind with 17 clauses, setting a variable x false leaves Kraft sum (17 + p − q)/16, where p and q count the
+   positive and negative occurrences of x. If q = p + 1 this is exactly 1, so the restricted formula would have
+   to tile its half-cube, which the same clash count rules out (a 3-clause clashes with at most 9 others). Hence
+   every variable occurs equally often with each sign. Item 8 below excludes 17 clauses altogether, which
+   extends Δ = 4 to n ≤ 41; each further clause adds about two vertices.
+
+8. **No unsatisfiable (4,3,3)-formula has fewer than 18 clauses (new, short proof).** For a CNF F on n
+   variables let N(x) be the number of clauses falsified by the assignment x. If F is unsatisfiable then
+   N ≥ 1 everywhere, so h = N − 1 is a nonnegative integer function, and for clauses of width 4 it is a
+   polynomial of degree at most 4 in x. Suppose F has 17 clauses. Then the values of h add up to
+   17·2^(n−4) − 2^n = 2^(n−4). A polynomial of degree d that is not identically zero is nonzero on at least
+   2^(n−d) points of the cube (the cube version of the Schwartz–Zippel lemma), so h is nonzero on at least
+   2^(n−4) points; with total 2^(n−4) this forces h to take only the values 0 and 1. Then
+   Σ N(N − 1) = Σ (h + 1)h = 2·Σ h = 2^(n−3). On the other hand Σ N(N − 1) counts ordered pairs of
+   different clauses together with a point falsifying both. Two clauses that do not clash are both falsified
+   on at least 2^(n−8) points, and each clause clashes with at most 12 others (4 literals, each complement
+   used at most 3 times), so it has at least 4 non-clashing partners. That gives Σ N(N − 1) ≥ 17·4·2^(n−8)
+   = 68·2^(n−8), more than 2^(n−3) = 32·2^(n−8). So 17 clauses are impossible, and with the tiling argument
+   of item 7 every unsatisfiable formula of this kind has at least 18 clauses. **Consequence: Baste's
+   inequality holds for every 4-regular graph on at most 41 vertices.** The same argument gives at least
+   2^Δ + 2 clauses for Δ = 5 and 6 (no change to those ranges), and it only needs the low degree, so it also
+   applies to formulas with repeated clauses. With 18 clauses the count no longer closes, because h may
+   then take the value 2 (three clauses failing at one point). Item 9 gets past this with a different count.
+
+9. **A one-flip count: unsatisfiable formulas of this kind need at least 20 / 42 / 90 clauses for Δ = 4 / 5 / 6
+   (new).** This supersedes the clause bounds of items 7 and 8. Let F be an unsatisfiable Δ-CNF in which every
+   literal occurs at most Δ − 1 times, with m clauses, and let N(x) count the clauses falsified by x. Every
+   clause has exactly Δ distinct variables. Gupta's formulas can also contain repeated clauses (unmatched
+   vertices with the same neighbourhood) and tautologies (an unmatched vertex adjacent to both ends of a
+   matching edge); deleting both keeps the formula unsatisfiable and only lowers m, so the bound applies to
+   them too (pointed out by the second agent in issue #2).
+   - *Many assignments falsify exactly one clause.* N ≥ 1 everywhere, so at most Σ (N − 1) = (m/2^Δ − 1)·2^n
+     assignments have N ≥ 2, and at least (2 − m/2^Δ)·2^n have N = 1.
+   - *At such an assignment every flip is blocked.* Let N(x) = 1 with C the falsified clause, and flip a
+     variable v of C. This satisfies C and every clause that agrees with C on v, and changes no other clause
+     except those containing the opposite literal on v. Since F is unsatisfiable, one of those, D, must have
+     all its other literals false at x. Call v *blocked* at x. So x lies in B_C, the set of assignments that
+     falsify C and at which all Δ variables of C are blocked, and #{N = 1} ≤ Σ_C |B_C|.
+   - *B_C is a small part of the 2^(n−Δ) assignments falsifying C.* A blocker D of v clashes with C only at v
+     (a second clash would make D true wherever C is false). It consists of the opposite literal on v, some j
+     literals of C and Δ − 1 − j free literals, so when C is false it is active with probability
+     2^(j−(Δ−1)). At most Δ − 1 clauses contain the opposite literal on v, and each literal of C occurs in at
+     most Δ − 2 clauses besides C. So if u_v counts the literals of C used by the blockers of v, then
+     Σ_v u_v ≤ Δ(Δ − 2). There are three cases; the union bound and the convexity of 2^j do the work.
+     (i) Some u_v ≤ Δ − 3. Then v's blockers are active with probability ≤ 1/4 + (Δ − 2)/2^(Δ−1).
+     (ii) Every u_v = Δ − 2, but some v has no *main* blocker (one sharing Δ − 2 literals with C). Then v's
+     blockers are active with probability ≤ 1/4 + 1/2^(Δ−2) + (Δ − 3)/2^(Δ−1).
+     (iii) Every v has a main blocker, whose single free literal f_v I call v's main literal, plus at most
+     Δ − 2 residual blockers that share nothing with C. If two main literals are complementary, the two
+     variables are blocked together only where one of their residual blockers is active, probability
+     ≤ 2(Δ − 2)/2^(Δ−1). Otherwise let f be a main literal shared by as many variables as possible, say t of
+     them, and condition on f. If f is false, some variable w with a different main literal has no blocker
+     containing f (f has at most Δ − 1 − t further occurrences, and there are Δ − t such variables), and w
+     must still be blocked: probability ≤ 1/4 + (Δ − 2)/2^Δ. If f is true, a variable with main literal f
+     must be blocked by a residual blocker: probability ≤ (Δ − 2)/2^(Δ−1). Together ≤ 1/4 + 3(Δ − 2)/2^Δ.
+     The largest of these bounds is b = 5/8, 17/32, 7/16 for Δ = 4, 5, 6, so |B_C| ≤ b·2^(n−Δ).
+   - *Combining:* (2 − m/2^Δ)·2^n ≤ m·b·2^(n−Δ), so m ≥ 2^(Δ+1)/(1 + b), which gives m ≥ 20, 42, 90.
+
+   **Consequence: Baste's inequality holds for all 4-regular graphs on at most 47 vertices, all 5-regular graphs
+   on at most 94 vertices and all 6-regular graphs on at most 197 vertices** (Gupta: 37 / 70 / 140; `ranges.py`).
+   The sharper Δ = 4 constant below raises the first range to 48.
+
+   *Sharper constant for Δ = 4 (computer-assisted): b < 3/5, so at least 21 clauses and n ≤ 48.* With
+   m = 20 the count needs Σ_C |B_C| ≥ 12·2^(n−4), so b < 3/5 is enough.
+   - Case (i) gives at most 1/2.
+   - Case (iii), with complementary main literals, gives at most 1/2. With a main literal shared by two or
+     three variables it gives at most 3/8 + 3/16 = 9/16, because the complement of f lies in at most 3 of
+     their residual blockers.
+   - Case (iii), with all main literals distinct: if some variable has at most one residual blocker, or a
+     residual blocker not containing the complement of its main literal, conditioning on that main literal
+     gives at most 3/8 + 3/16.
+   - Case (iii), remaining configuration: every residual blocker of v is {¬f_v} ∪ P_v with a 2-literal set
+     P_v. Condition on the four main literals and bound each variable by the sum over its two P-sets.
+     `case3_enum.c` enumerates all 8.2 million ways the P-sets can use main literals within the budget.
+     The result is β ≤ 37/64 ≈ 0.578.
+   - Case (ii): some variable a has the pattern {1,1,0}, with events P, P' (two free literals each) and A
+     (three). β ≥ 3/5 would need these three events to be pairwise inconsistent, so Pr = 5/8 exactly (a
+     consistent pair overlaps by at least 1/32). It would also need every other variable to cover them
+     up to 1/40. `case2_cover.py` enumerates all 200 such structures and every way another variable can use
+     their literals. It shows three covering variables never fit the literal budget. A looser limit (1/4)
+     does find feasible triples, so the test is not vacuous.
+
+   These two steps are machine-checked exhaustive enumerations on top of the hand reductions above. An
+   annealing search over local configurations (`beta_anneal.py`, `beta_anneal_general.py`) never finds more
+   than 33/64 ≈ 0.516. If that is the true worst case, the count gives 22 clauses (51 vertices), but I have
+   not proved it. This per-clause count cannot reach 23 clauses for Δ = 4, because configurations above
+   10/22 exist.
+   I have not found this argument in the literature, but it is elementary and may well be known in some form;
+   the new part here is combining it with the literal bound and Gupta's reduction.
+
+   `flip_bound.py` checks the second step by brute force on random unsatisfiable formulas, checks the bound on
+   B_C on random literal-bounded formulas, and recomputes the clause bounds and vertex ranges. One side fact
+   from the work on 18 clauses holds for any 4-CNF, with no literal bound: an unsatisfiable 4-CNF with m clauses
+   never has more than m − 16 pairwise variable-disjoint clauses whose variable sets no other clause uses.
+   (Restrict to the assignments where each of those clauses has the "wrong" parity on its four variables; they
+   then never fail, while every other clause still fails with probability exactly 1/16.) `fourier_checks.py`
+   checks this identity and the second-moment identity of item 8 by brute force.
 
 ## Honest assessment
 
@@ -152,8 +269,8 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
   is tree-like (deficiency 1), so by Lemma 2 it must contain a literal occurring 4 or more times, and no
   rebalancing within that class can help. Zhang–Peitl–Szeider's 235-clause version adds a 7-clause
   non-tree axiom; I did not check its literal counts.
-- **Where Δ = 4 now stands:** by Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5
-  exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
+- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 21 clauses (item 9), and by
+  Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5 exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
   by 1. No block appeared in any search, but the searches only reach about 17 variables, and the 3-CNF
   experience (smallest objects much larger than the counting bound) says small searches prove little.
 
@@ -174,6 +291,13 @@ gcc -O3 -o hsearch3 hsearch3.c -lm; ./hsearch3 15 18 5 3 1 400000 1.0 0 4      #
 python3 compose_blocks.py                            # Lemma 1 composition, tested on a synthetic block
 python3 cegar_sym2.py 5 2 3,4,4 3                    # symmetric exact search: "NO BLOCK" for Z5, 10 variables
 python3 shearer_block.py                             # local lemma ratios
+python3 ranges.py                                    # vertex ranges where the reduction is guaranteed to work
+python3 fourier_checks.py                            # brute-force check of the identities in items 8 and 9
+python3 flip_bound.py                                # checks for the one-flip count, new clause bounds and ranges
+python3 beta_anneal.py 8 11 30000 10                 # adversarial search for large B_C, degree 4 (finds 33/64)
+python3 beta_anneal_general.py 5 9 3 25000 6         # the same for any degree D (here D = 5)
+gcc -O2 -o case3_enum case3_enum.c && ./case3_enum  # degree 4, case (iii) sub-case: beta <= 37/64
+python3 case2_cover.py                               # degree 4, case (ii): beta < 3/5 (about 2 minutes)
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run
