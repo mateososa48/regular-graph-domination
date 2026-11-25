@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7 and 8 below extend this to 41 / 76 / 145) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 47 / 84 / 174) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -175,32 +175,54 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    inequality holds for every 4-regular graph on at most 41 vertices.** The same argument gives at least
    2^Δ + 2 clauses for Δ = 5 and 6 (no change to those ranges), and it only needs the low degree, so it also
    applies to formulas with repeated clauses. With 18 clauses the count no longer closes, because h may
-   then take the value 2 (three clauses failing at one point); item 9 collects what I could prove there.
+   then take the value 2 (three clauses failing at one point). Item 9 gets past this with a different count.
 
-9. **Partial results for 18 clauses.** Suppose an unsatisfiable (4,3,3)-formula had exactly 18 clauses. Two
-   facts follow, but I have not finished the case:
-   - *Every variable occurs equally often with each sign.* Say x occurs p times positively and q < p times
-     negatively (the other case is symmetric) and set x true. The remaining clauses, q of them shortened to
-     width 3, have weight Σ 2^(−width) = (18 − p + q)/16. If p − q ≥ 3 this is below 1, so the restriction is
-     satisfiable. If p − q = 2 it is exactly 1, so the remaining clauses would tile the half-cube and every two
-     of them would clash, but a remaining width-4 clause has at least 14 others and clashes with at most 12.
-     If p = 1 and q = 0 the restriction is a 17-clause formula of the same kind, excluded by item 8. If
-     p − q = 1 and p ≥ 2 the weight is 17/16, the degree argument of item 8 makes the restricted h 0/1, and its
-     second moment is then exactly 2/16 = 32/256, while the non-clashing pairs among the remaining clauses
-     already contribute at least 46/256 (p = 3) or 57/256 (p = 2).
-   - *No three clauses use pairwise disjoint sets of variables, unless another clause uses one of those three
-     variable sets too.* Restrict to the assignments where, for each of the three clauses, the parity of its
-     four variables differs from the parity at which that clause fails. Those three clauses are then never
-     falsified. The three parity conditions involve disjoint 4-sets and no combination of them fits inside a
-     different 4-set, so the values on any other clause's variables stay uniformly distributed and that
-     clause is still falsified with probability exactly 1/16. The average of N over these assignments is
-     therefore 15/16 < 1, and one of them satisfies the formula. This part needs no bound on literal
-     occurrences: an unsatisfiable 4-CNF with m clauses has at most m − 16 pairwise variable-disjoint clauses
-     whose variable sets no other clause uses.
+9. **A one-flip count: unsatisfiable formulas of this kind need at least 20 / 38 / 79 clauses for Δ = 4 / 5 / 6
+   (new).** This supersedes the clause bounds of items 7 and 8. Let F be an unsatisfiable Δ-CNF in which every
+   literal occurs at most Δ − 1 times, with m clauses, and let N(x) count the clauses falsified by x.
+   - *Many assignments falsify exactly one clause.* N ≥ 1 everywhere, so at most Σ (N − 1) = (m/2^Δ − 1)·2^n
+     assignments have N ≥ 2, and at least (2 − m/2^Δ)·2^n have N = 1.
+   - *At such an assignment every flip is blocked.* Let N(x) = 1 with C the falsified clause, and flip a
+     variable v of C. This satisfies C and every clause that agrees with C on v, and changes no other clause
+     except those containing the opposite literal on v. Since F is unsatisfiable, one of those, D, must have
+     all its other literals false at x. Call v *blocked* at x. So x lies in B_C, the set of assignments that
+     falsify C and at which all Δ variables of C are blocked, and #{N = 1} ≤ Σ_C |B_C|.
+   - *B_C is a small part of the 2^(n−Δ) assignments falsifying C.* A blocker D of v clashes with C only at v
+     (a second clash would make D true wherever C is false). It consists of the opposite literal on v, some j
+     literals of C and Δ − 1 − j other literals, so when C is false it is active with probability
+     2^(j−(Δ−1)). At most Δ − 1 clauses contain the opposite literal on v. Each literal of C occurs in at most
+     Δ − 2 clauses besides C, so the blockers of all Δ variables together use at most Δ(Δ − 2) occurrences of literals
+     of C, and some variable of C has blockers using at most Δ − 2 of them. By convexity its blockers are active with
+     probability at most 1/2 + (Δ − 2)/2^(Δ−1) (one blocker sharing Δ − 2 literals with C, the rest sharing
+     none). Hence |B_C| ≤ b·2^(n−Δ) with b = 1/2 + (Δ − 2)/2^(Δ−1), which is 3/4, 11/16 and 5/8 for Δ = 4, 5, 6.
+   - Combining: (2 − m/2^Δ)·2^n ≤ m·b·2^(n−Δ), so m ≥ 2^(Δ+1)/(1 + b). This gives m ≥ 38 for Δ = 5 and m ≥ 79
+     for Δ = 6. For Δ = 4 it gives m ≥ 19, and a short case analysis (below) improves b to 5/8 and m to 20.
 
-   Excluding 18 clauses would extend Δ = 4 to n ≤ 44. `fourier_checks.py` checks the two counting identities
-   behind items 8 and 9 (the second moment as a sum over non-clashing pairs, and the average over a parity
-   set) by brute force on random formulas.
+   **Consequence: Baste's inequality holds for all 4-regular graphs on at most 47 vertices, all 5-regular graphs
+   on at most 84 vertices and all 6-regular graphs on at most 174 vertices** (Gupta: 37 / 70 / 140; `ranges.py`).
+
+   *The Δ = 4 case analysis.* Write u_v for the number of literals of C used by the blockers of v, so
+   Σ u_v ≤ 8. If some u_v ≤ 1, the blockers of v are active with probability at most 1/4 + 1/8 + 1/8 = 1/2.
+   Otherwise every u_v = 2, and the union bound gives 5/8 unless every variable of C has the pattern "a main
+   blocker sharing two literals of C plus two residual blockers sharing none". Then each variable v has a main
+   blocker with a single free literal f_v (active iff f_v is false) and two residual blockers with three free
+   literals each. If two main literals are complementary, two variables are blocked together only where one of
+   their four residual blockers is active, probability ≤ 4/8. Otherwise let f be a main literal shared by as
+   many variables as possible, and condition on f. If f is false, some variable w with a different main literal
+   whose residual blockers avoid f must be blocked (if t variables have main literal f, f has at most 3 − t
+   further occurrences, too few to reach all 4 − t other variables); that has probability ≤ 1/4 + 2/16 = 3/8. If f is true, a variable with main literal f must be blocked by a residual blocker,
+   probability ≤ 2/8, and ≤ 1/8 + 1/16 when two or three variables share f (the complement of f occurs at most
+   3 times, so one of them has at most one residual blocker containing it). In all cases |B_C| ≤ (5/8)·2^(n−4).
+   An annealing search over these local configurations (`beta_anneal.py`) finds at most 33/64 ≈ 0.516. If that
+   is the true worst case, the same count gives 22 clauses for Δ = 4 (51 vertices), but I have not proved it.
+
+   `flip_bound.py` checks the second step by brute force on random unsatisfiable formulas, checks the bound on
+   B_C on random literal-bounded formulas, and recomputes the clause bounds and vertex ranges. One side fact
+   from the work on 18 clauses holds for any 4-CNF, with no literal bound: an unsatisfiable 4-CNF with m clauses
+   never has more than m − 16 pairwise variable-disjoint clauses whose variable sets no other clause uses.
+   (Restrict to the assignments where each of those clauses has the "wrong" parity on its four variables; they
+   then never fail, while every other clause still fails with probability exactly 1/16.) `fourier_checks.py`
+   checks this identity and the second-moment identity of item 8 by brute force.
 
 ## Honest assessment
 
@@ -220,7 +242,7 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
   is tree-like (deficiency 1), so by Lemma 2 it must contain a literal occurring 4 or more times, and no
   rebalancing within that class can help. Zhang–Peitl–Szeider's 235-clause version adds a 7-clause
   non-tree axiom; I did not check its literal counts.
-- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 18 clauses (item 8), and by
+- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 20 clauses (item 9), and by
   Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5 exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
   by 1. No block appeared in any search, but the searches only reach about 17 variables, and the 3-CNF
   experience (smallest objects much larger than the counting bound) says small searches prove little.
@@ -244,6 +266,8 @@ python3 cegar_sym2.py 5 2 3,4,4 3                    # symmetric exact search: "
 python3 shearer_block.py                             # local lemma ratios
 python3 ranges.py                                    # vertex ranges where the reduction is guaranteed to work
 python3 fourier_checks.py                            # brute-force check of the identities in items 8 and 9
+python3 flip_bound.py                                # checks for the one-flip count, new clause bounds and ranges
+python3 beta_anneal.py 8 11 30000 10                 # adversarial search for large B_C (finds 33/64)
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run
