@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; item 7 below extends this to 40 / 76 / 142) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -78,7 +78,7 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    (FormalConjecturesForMathlib/Combinatorics/SimpleGraph/Domination.lean) never requires the set M to
    consist of edges of G. For K₃,₃, M = {s(a₁,a₂), s(a₃,b₁)} is accepted, giving 2 instead of the true value 3.
    The definition is unused so far, and a search of issues and PRs found no report of it.
-   See `ISSUE_formal_conjectures.md`. (TxGraffiti Conjecture 3 still being marked "open" there is already
+   Filed as google-deepmind/formal-conjectures#8290 (text in `ISSUE_formal_conjectures.md`). (TxGraffiti Conjecture 3 still being marked "open" there is already
    reported: issue #6737, PR #7661.) `EdgeDomBugDemo.lean` proves `edgeDominationNumber K₃,₃ ≤ 2` against
    the repository itself (commit `9097e2f`, Lean v4.33.1) using only the standard axioms, and compares it
    with the library's own `saturationNumber K₃,₃ = 3` (that step uses `native_decide`).
@@ -134,6 +134,22 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
        with 12 variables and 16 clauses. Larger symmetric cases (up to 30 variables) were still running on the
        Mac when this was written.
 
+7. **Slightly larger verified ranges for degrees 4, 5, 6 (rigorous, elementary).** Gupta's reduction succeeds
+   whenever the formula it produces is satisfiable. He guarantees this when the formula has at most 2^Δ − 1
+   clauses (union bound). One more clause is free: an unsatisfiable formula with exactly 2^Δ clauses of width Δ
+   would need its falsified subcubes to tile the cube exactly, so every two clauses would clash. But with every
+   literal occurring at most Δ − 1 times, a clause clashes with at most Δ(Δ − 1) others, and
+   Δ(Δ − 1) < 2^Δ − 1 for Δ ≥ 4. With the integer form of Gupta's bound |M| ≥ ⌈Δn/(4Δ − 2)⌉ this gives
+   **Δ = 4: all graphs with n ≤ 40 (was 37); Δ = 5: n ≤ 76 (was 70); Δ = 6: n ≤ 142 (was 140)**
+   (`ranges.py` reproduces Gupta's 48 / 37 / 70 and computes the new values; for Δ = 6 the union bound alone
+   already gives 141 with exact rounding). A further observation for Δ = 4: in an unsatisfiable formula of this
+   kind with 17 clauses, setting a variable x false leaves Kraft sum (17 + p − q)/16, where p and q count the
+   positive and negative occurrences of x. If q = p + 1 this is exactly 1, so the restricted formula would have
+   to tile its half-cube, which the same clash count rules out (a 3-clause clashes with at most 9 others). Hence
+   every variable occurs equally often with each sign. Excluding 17 clauses altogether would extend Δ = 4 to
+   n ≤ 41, and each further clause adds about two vertices; I did not manage that (an exact SAT search is too
+   weak at this kind of counting).
+
 ## Honest assessment
 
 - Nothing here settles Δ ∈ {4,5,6}. The evidence points toward the inequality being **true** for Δ = 4.
@@ -174,6 +190,7 @@ gcc -O3 -o hsearch3 hsearch3.c -lm; ./hsearch3 15 18 5 3 1 400000 1.0 0 4      #
 python3 compose_blocks.py                            # Lemma 1 composition, tested on a synthetic block
 python3 cegar_sym2.py 5 2 3,4,4 3                    # symmetric exact search: "NO BLOCK" for Z5, 10 variables
 python3 shearer_block.py                             # local lemma ratios
+python3 ranges.py                                    # vertex ranges where the reduction is guaranteed to work
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run
