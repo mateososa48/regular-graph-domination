@@ -11,6 +11,12 @@ guaranteed when it has fewer clauses than the smallest unsatisfiable formula of 
                               (Delta >= 4: with exactly 2^Delta clauses the falsified subcubes
                               would tile the cube, so every two clauses would clash, but a clause
                               clashes with at most Delta*(Delta-1) < 2^Delta - 1 others)
+  Delta = 4, 17 clauses: also always satisfiable (low-degree polynomial argument, README item 8):
+                              h = N - 1, where N(x) counts the clauses falsified at x, is a polynomial
+                              of degree <= 4 with sum 2^(n-4); a nonzero degree-4 polynomial is nonzero
+                              on >= 2^(n-4) points of the cube, so h is 0/1-valued; then
+                              sum N(N-1) = 2^(n-3), but every clause has >= 4 non-clashing partners,
+                              which forces sum N(N-1) >= 17*4*2^(n-8) > 2^(n-3).
   Delta = 6, 65 clauses: also always satisfiable.  Restrict F to the 6 variables of any clause C.
                               The 64 restrictions have Kraft sums adding up to 65, each >= 1.  The one
                               falsifying C contains the empty clause plus >= 64 - 30 surviving clauses,
@@ -33,6 +39,6 @@ def max_safe_n(delta, max_sat_clauses, n_limit=2000):
             return best
     return best
 
-for delta, gupta, ours in [(3, 19, 19), (4, 15, 16), (5, 31, 32), (6, 63, 65)]:
+for delta, gupta, ours in [(3, 19, 19), (4, 15, 17), (5, 31, 33), (6, 63, 65)]:
     print(f"Delta={delta}: union bound -> n <= {max_safe_n(delta, gupta)};  "
-          f"tiling argument -> n <= {max_safe_n(delta, ours)}")
+          f"this log -> n <= {max_safe_n(delta, ours)}")

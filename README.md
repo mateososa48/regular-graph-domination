@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; item 7 below extends this to 40 / 76 / 145) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7 and 8 below extend this to 41 / 76 / 145) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -159,6 +159,25 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    every variable occurs equally often with each sign. Excluding 17 clauses altogether would extend Δ = 4 to
    n ≤ 41, and each further clause adds about two vertices; I did not manage that (an exact SAT search is too
    weak at this kind of counting).
+
+8. **No unsatisfiable (4,3,3)-formula has fewer than 18 clauses (new, short proof).** For a CNF F on n
+   variables let N(x) be the number of clauses falsified by the assignment x. If F is unsatisfiable then
+   N ≥ 1 everywhere, so h = N − 1 is a nonnegative integer function, and for clauses of width 4 it is a
+   polynomial of degree at most 4 in x. Suppose F has 17 clauses. Then the values of h add up to
+   17·2^(n−4) − 2^n = 2^(n−4). A polynomial of degree d that is not identically zero is nonzero on at least
+   2^(n−d) points of the cube (the cube version of the Schwartz–Zippel lemma), so h is nonzero on at least
+   2^(n−4) points; with total 2^(n−4) this forces h to take only the values 0 and 1. Then
+   Σ N(N − 1) = Σ (h + 1)h = 2·Σ h = 2^(n−3). On the other hand Σ N(N − 1) counts ordered pairs of
+   different clauses together with a point falsifying both. Two clauses that do not clash are both falsified
+   on at least 2^(n−8) points, and each clause clashes with at most 12 others (4 literals, each complement
+   used at most 3 times), so it has at least 4 non-clashing partners. That gives Σ N(N − 1) ≥ 17·4·2^(n−8)
+   = 68·2^(n−8), more than 2^(n−3) = 32·2^(n−8). So 17 clauses are impossible, and with the tiling argument
+   of item 7 every unsatisfiable formula of this kind has at least 18 clauses. **Consequence: Baste's
+   inequality holds for every 4-regular graph on at most 41 vertices.** The same argument gives at least
+   2^Δ + 2 clauses for Δ = 5 and 6 (no change to those ranges), and it only needs the low degree, so it also
+   applies to formulas with repeated clauses. Pushing it to 18 clauses would need control of points where
+   three or more clauses fail at once; the first cases (h ≤ 2, or a variable with unequal sign counts)
+   can be ruled out the same way, but I have not closed the rest.
 
 ## Honest assessment
 
