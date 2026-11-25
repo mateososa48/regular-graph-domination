@@ -28,6 +28,8 @@ guaranteed when it has fewer clauses than the smallest unsatisfiable formula of 
                               lies in the set B_C where every flip of a variable of C is blocked, and
                               |B_C| <= b 2^(n-Delta) with b = 5/8, 17/32, 7/16.  So m >= 2^(Delta+1)/(1+b):
                               every such formula with <= 19 / 41 / 89 clauses is satisfiable.
+                              For Delta = 4 two exhaustive enumerations (case3_enum.c, case2_cover.py)
+                              give b < 3/5, hence <= 20 clauses.
   Delta = 3: Zhang-Peitl-Szeider's exact value 20 (formulas with <= 19 clauses are satisfiable)
 """
 from math import ceil
@@ -44,6 +46,6 @@ def max_safe_n(delta, max_sat_clauses, n_limit=2000):
             return best
     return best
 
-for delta, gupta, ours in [(3, 19, 19), (4, 15, 19), (5, 31, 41), (6, 63, 89)]:
+for delta, gupta, ours in [(3, 19, 19), (4, 15, 20), (5, 31, 41), (6, 63, 89)]:
     print(f"Delta={delta}: union bound -> n <= {max_safe_n(delta, gupta)};  "
           f"this log -> n <= {max_safe_n(delta, ours)}")

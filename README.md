@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 47 / 94 / 197) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 48 / 94 / 197) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -213,11 +213,33 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
 
    **Consequence: Baste's inequality holds for all 4-regular graphs on at most 47 vertices, all 5-regular graphs
    on at most 94 vertices and all 6-regular graphs on at most 197 vertices** (Gupta: 37 / 70 / 140; `ranges.py`).
+   The sharper Δ = 4 constant below raises the first range to 48.
 
-   For Δ = 4, cases (ii) and (iii) both reach 5/8, so both would need sharpening. An annealing search over the
-   local configurations (`beta_anneal.py`, `beta_anneal_general.py`) never finds more than 33/64 ≈ 0.516 for
-   Δ = 4. If that is the true worst case, the count gives 22 clauses (51 vertices), but I have not proved it.
-   This per-clause count cannot reach 23 clauses for Δ = 4, because configurations above 10/22 exist.
+   *Sharper constant for Δ = 4 (computer-assisted): b < 3/5, so at least 21 clauses and n ≤ 48.* With
+   m = 20 the count needs Σ_C |B_C| ≥ 12·2^(n−4), so b < 3/5 is enough.
+   - Case (i) gives at most 1/2.
+   - Case (iii), with complementary main literals, gives at most 1/2. With a main literal shared by two or
+     three variables it gives at most 3/8 + 3/16 = 9/16, because the complement of f lies in at most 3 of
+     their residual blockers.
+   - Case (iii), with all main literals distinct: if some variable has at most one residual blocker, or a
+     residual blocker not containing the complement of its main literal, conditioning on that main literal
+     gives at most 3/8 + 3/16.
+   - Case (iii), remaining configuration: every residual blocker of v is {¬f_v} ∪ P_v with a 2-literal set
+     P_v. Condition on the four main literals and bound each variable by the sum over its two P-sets.
+     `case3_enum.c` enumerates all 8.2 million ways the P-sets can use main literals within the budget.
+     The result is β ≤ 37/64 ≈ 0.578.
+   - Case (ii): some variable a has the pattern {1,1,0}, with events P, P' (two free literals each) and A
+     (three). β ≥ 3/5 would need these three events to be pairwise inconsistent, so Pr = 5/8 exactly (a
+     consistent pair overlaps by at least 1/32). It would also need every other variable to cover them
+     up to 1/40. `case2_cover.py` enumerates all 200 such structures and every way another variable can use
+     their literals. It shows three covering variables never fit the literal budget. A looser limit (1/4)
+     does find feasible triples, so the test is not vacuous.
+
+   These two steps are machine-checked exhaustive enumerations on top of the hand reductions above. An
+   annealing search over local configurations (`beta_anneal.py`, `beta_anneal_general.py`) never finds more
+   than 33/64 ≈ 0.516. If that is the true worst case, the count gives 22 clauses (51 vertices), but I have
+   not proved it. This per-clause count cannot reach 23 clauses for Δ = 4, because configurations above
+   10/22 exist.
    I have not found this argument in the literature, but it is elementary and may well be known in some form;
    the new part here is combining it with the literal bound and Gupta's reduction.
 
@@ -247,7 +269,7 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
   is tree-like (deficiency 1), so by Lemma 2 it must contain a literal occurring 4 or more times, and no
   rebalancing within that class can help. Zhang–Peitl–Szeider's 235-clause version adds a 7-clause
   non-tree axiom; I did not check its literal counts.
-- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 20 clauses (item 9), and by
+- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 21 clauses (item 9), and by
   Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5 exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
   by 1. No block appeared in any search, but the searches only reach about 17 variables, and the 3-CNF
   experience (smallest objects much larger than the counting bound) says small searches prove little.
@@ -274,6 +296,8 @@ python3 fourier_checks.py                            # brute-force check of the 
 python3 flip_bound.py                                # checks for the one-flip count, new clause bounds and ranges
 python3 beta_anneal.py 8 11 30000 10                 # adversarial search for large B_C, degree 4 (finds 33/64)
 python3 beta_anneal_general.py 5 9 3 25000 6         # the same for any degree D (here D = 5)
+gcc -O2 -o case3_enum case3_enum.c && ./case3_enum  # degree 4, case (iii) sub-case: beta <= 37/64
+python3 case2_cover.py                               # degree 4, case (ii): beta < 3/5 (about 2 minutes)
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run

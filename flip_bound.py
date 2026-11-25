@@ -102,7 +102,7 @@ def check_step2(rng, trials=40):
 def main():
     rng = random.Random(7)
     print("Step 2 (inclusion N=1 points in B_C) verified on", check_step2(rng), "random unsatisfiable 4-CNFs")
-    bounds = {4: Fr(5, 8), 5: Fr(17, 32), 6: Fr(7, 16)}
+    bounds = {4: Fr(5, 8), 5: Fr(17, 32), 6: Fr(7, 16)}   # degree 4 improves to b < 3/5 (README item 9)
     for k, b in bounds.items():
         worst = Fr(0)
         for _ in range({4: 400, 5: 150, 6: 60}[k]):
