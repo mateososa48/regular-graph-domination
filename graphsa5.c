@@ -1,0 +1,178 @@
+/* Simulated annealing over connected D-regular graphs on n vertices (n <= 60, edges <= 128),
+ * maximizing  f = i(G) - gamma_e(G)   (i = independent domination number,
+ * gamma_e = minimum maximal matching).  f >= 1 is a counterexample to the TxGraffiti
+ * inequality i <= gamma_e; we also report gamma(G) for any such graph.
+ * Moves: double-edge swaps preserving regularity and connectivity.
+ * usage: graphsa D n seed steps T0
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <math.h>
+
+typedef unsigned __int128 u128;
+static inline int pc(u128 x){ return __builtin_popcountll((uint64_t)x) + __builtin_popcountll((uint64_t)(x>>64)); }
+static inline int ctz(u128 x){ uint64_t lo=(uint64_t)x; return lo ? __builtin_ctzll(lo) : 64 + __builtin_ctzll((uint64_t)(x>>64)); }
+#define ONE ((u128)1)
+
+static int N; static u128 NB[128]; static u128 ALL; static int MAXC;
+static long long nodes;
+static int dfs(u128 dom, u128 forb, int c, int K, int indep) {
+    nodes++;
+    if (dom == ALL) return 1;
+    if (c >= K) return 0;
+    u128 und = ALL & ~dom;
+    int u = pc(und);
+    if (c + (u + MAXC - 1) / MAXC > K) return 0;
+    int bestc = 1000; u128 bestcand = 0; u128 t = und;
+    while (t) { int v = ctz(t); t &= t - 1; u128 cand = NB[v] & ~forb; int cc = pc(cand);
+        if (cc < bestc) { bestc = cc; bestcand = cand; if (cc <= 1) break; } }
+    if (bestc == 0) return 0;
+    u128 cand = bestcand;
+    while (cand) { int w = ctz(cand); cand &= cand - 1;
+        u128 nf = indep ? (forb | NB[w]) : (forb | (ONE << w));
+        if (dfs(dom | NB[w], nf, c + 1, K, indep)) return 1;
+        forb |= ONE << w; }
+    return 0;
+}
+static int exists_le(int K, int indep){ return dfs(0,0,0,K,indep); }
+static long long CAP, CNT;
+static void cdfs(u128 dom, u128 forb, int c, int K, int indep) {
+    if (CNT >= CAP) return;
+    if (dom == ALL) { CNT++; return; }
+    if (c >= K) return;
+    u128 und = ALL & ~dom; int u = pc(und);
+    if (c + (u + MAXC - 1) / MAXC > K) return;
+    int bestc = 1000; u128 bestcand = 0; u128 t = und;
+    while (t) { int v = ctz(t); t &= t - 1; u128 cand = NB[v] & ~forb; int cc = pc(cand);
+        if (cc < bestc) { bestc = cc; bestcand = cand; if (cc <= 1) break; } }
+    if (bestc == 0) return;
+    u128 cand = bestcand;
+    while (cand) { int w = ctz(cand); cand &= cand - 1;
+        u128 nf = indep ? (forb | NB[w]) : (forb | (ONE << w));
+        cdfs(dom | NB[w], nf, c + 1, K, indep);
+        forb |= ONE << w; }
+}
+static long long count_le(int K, int indep, long long cap){ CAP = cap; CNT = 0; cdfs(0,0,0,K,indep); return CNT; }
+static int exact_min(int lo, int indep){ int K = lo; while (!exists_le(K, indep)) K++; return K; }
+
+static int D, n, m;
+static int adj[64][64];
+static int eu[128], ev[128];
+
+static uint64_t rs;
+static inline uint64_t rnd(void){ rs ^= rs << 13; rs ^= rs >> 7; rs ^= rs << 17; return rs; }
+static inline double urand(void){ return (rnd() >> 11) * (1.0/9007199254740992.0); }
+
+static void load_vertex_graph(void){
+    N = n; ALL = (ONE << n) - 1; MAXC = D + 1;
+    for (int v = 0; v < n; v++){ u128 nb = ONE << v; for (int w = 0; w < n; w++) if (adj[v][w]) nb |= ONE << w; NB[v] = nb; }
+}
+static void load_line_graph(void){
+    N = m; ALL = (m == 128) ? ~(u128)0 : ((ONE << m) - 1); MAXC = 2*D - 1;
+    for (int a = 0; a < m; a++){ u128 nb = ONE << a;
+        for (int b = 0; b < m; b++) if (b != a && (eu[a]==eu[b]||eu[a]==ev[b]||ev[a]==eu[b]||ev[a]==ev[b])) nb |= ONE << b;
+        NB[a] = nb; }
+}
+static void rebuild_edges(void){ m = 0; for (int i = 0; i < n; i++) for (int j = i+1; j < n; j++) if (adj[i][j]) { eu[m]=i; ev[m]=j; m++; } }
+
+static int connected(void){
+    int seen[64] = {0}, st[64], sp = 0; seen[0] = 1; st[sp++] = 0; int cnt = 1;
+    while (sp){ int v = st[--sp]; for (int w = 0; w < n; w++) if (adj[v][w] && !seen[w]) { seen[w] = 1; cnt++; st[sp++] = w; } }
+    return cnt == n;
+}
+static int random_regular(void){
+    for (int tries = 0; tries < 100000; tries++){
+        int stubs[64*8], s = 0; memset(adj, 0, sizeof adj);
+        for (int v = 0; v < n; v++) for (int r = 0; r < D; r++) stubs[s++] = v;
+        for (int i = s - 1; i > 0; i--){ int j = rnd() % (i+1); int t = stubs[i]; stubs[i] = stubs[j]; stubs[j] = t; }
+        int ok = 1;
+        for (int i = 0; i < s; i += 2){ int a = stubs[i], b = stubs[i+1]; if (a == b || adj[a][b]) { ok = 0; break; } adj[a][b] = adj[b][a] = 1; }
+        if (ok && connected()) { rebuild_edges(); return 1; }
+    }
+    return 0;
+}
+static int lbe(void){ return (D * n + (4*D - 2) - 1) / (4*D - 2); }
+static int INDEP = 1; static long long CCAP = 200000;
+static double ENERGY; static int IVAL;
+static void eval(int *ge, int *iv){
+    load_line_graph(); *ge = exact_min(lbe(), 1);
+    load_vertex_graph();
+    int lo = (n + D) / (D + 1);
+    int i0 = exact_min(lo, INDEP);            /* i(G) (or gamma(G) if INDEP==0) */
+    IVAL = i0;
+    if (i0 > *ge) { *iv = 0; ENERGY = -1.0; return; }
+    long long cnt = count_le(i0, INDEP, CCAP);   /* number of minimum (independent) dominating sets */
+    *iv = (int)cnt;
+    ENERGY = (double)(*ge - i0) * (log1p((double)CCAP) + 1.0) + log1p((double)cnt);
+}
+static char BESTFILE[512] = "";
+static void print_g6(FILE *f){
+    /* graph6 for n <= 62 */
+    fputc(63 + n, f); int k = 0, x = 0;
+    for (int j = 1; j < n; j++) for (int i = 0; i < j; i++){ x = (x << 1) | adj[i][j]; if (++k == 6){ fputc(63 + x, f); k = 0; x = 0; } }
+    if (k) { x <<= (6 - k); fputc(63 + x, f); }
+    fputc('\n', f);
+}
+
+int main(int argc, char **argv){
+    D = atoi(argv[1]); n = atoi(argv[2]); if (argc > 9) snprintf(BESTFILE, sizeof BESTFILE, "%s", argv[9]); if (argc > 6) INDEP = atoi(argv[6]); if (argc > 7) CCAP = atoll(argv[7]); rs = 0x9E3779B97F4A7C15ULL ^ ((uint64_t)atoll(argv[3]) * 0xD1B54A32D192ED03ULL);
+    long long steps = atoll(argv[4]); double T0 = atof(argv[5]);
+    if (argc > 8 && argv[8][0] && argv[8][0] != '-') {
+        const unsigned char *p = (const unsigned char *)argv[8]; int nn = *p++ - 63; if (nn != n) { fprintf(stderr, "seed n mismatch\n"); return 1; }
+        memset(adj, 0, sizeof adj); int k = 6, x = 0;
+        for (int j = 1; j < n; j++) for (int i = 0; i < j; i++) { if (k == 6) { x = *p++ - 63; k = 0; } int bit = (x >> (5 - k)) & 1; k++; if (bit) adj[i][j] = adj[j][i] = 1; }
+        rebuild_edges();
+    } else if (!random_regular()){ fprintf(stderr, "no init\n"); return 1; }
+    int ge, iv; eval(&ge, &iv);
+    double f = -ENERGY; double best = f;
+    fprintf(stderr, "init ge=%d i=%d count=%d\n", ge, IVAL, iv);
+    for (long long s = 0; s < steps; s++){
+        double T = T0 * (1.0 - (double)s / steps) + 0.02;
+        int e1 = rnd() % m, e2 = rnd() % m; if (e1 == e2) continue;
+        int a = eu[e1], b = ev[e1], c = eu[e2], d = ev[e2];
+        if (a==c||a==d||b==c||b==d) continue;
+        if (rnd() & 1){ int t = c; c = d; d = t; }
+        if (adj[a][c] || adj[b][d]) continue;
+        adj[a][b]=adj[b][a]=0; adj[c][d]=adj[d][c]=0; adj[a][c]=adj[c][a]=1; adj[b][d]=adj[d][b]=1;
+        if (!connected()){ adj[a][c]=adj[c][a]=0; adj[b][d]=adj[d][b]=0; adj[a][b]=adj[b][a]=1; adj[c][d]=adj[d][c]=1; continue; }
+        rebuild_edges();
+        int nge, niv; eval(&nge, &niv);
+        double nf = -ENERGY;
+        if (nf >= f || urand() < exp((nf - f) / T)){ f = nf; ge = nge; iv = niv;
+            if (f > best){ best = f; fprintf(stderr, "step %lld new best E=%.3f (ge=%d i=%d count=%d)\n", s, -f, ge, IVAL, iv);
+                if (BESTFILE[0]) { FILE *bf = fopen(BESTFILE, "w"); if (bf) { fprintf(bf, "E=%.4f ge=%d i=%d count=%d\n", -f, ge, IVAL, iv); print_g6(bf); fclose(bf); } } }
+            if (ENERGY < 0){
+                load_vertex_graph(); int g_le = exists_le(ge, 0); int ival = exact_min(ge + 1, 1);
+                printf("FOUND D=%d n=%d ge=%d i=%d gamma<=ge:%s ", D, n, ge, ival, g_le ? "yes" : "NO"); print_g6(stdout); fflush(stdout);
+                return 0; }
+        } else { adj[a][c]=adj[c][a]=0; adj[b][d]=adj[d][b]=0; adj[a][b]=adj[b][a]=1; adj[c][d]=adj[d][c]=1; rebuild_edges(); }
+    }
+    /* steepest descent from the final state */
+    for (int round = 0; round < 1000; round++){
+        double bestf = f; int ba=-1,bb=-1,bc=-1,bd=-1;
+        for (int e1 = 0; e1 < m; e1++) for (int e2 = e1+1; e2 < m; e2++) for (int typ = 0; typ < 2; typ++){
+            int a = eu[e1], b = ev[e1], c = eu[e2], d = ev[e2];
+            if (typ){ int t = c; c = d; d = t; }
+            if (a==c||a==d||b==c||b==d) continue;
+            if (adj[a][c] || adj[b][d]) continue;
+            adj[a][b]=adj[b][a]=0; adj[c][d]=adj[d][c]=0; adj[a][c]=adj[c][a]=1; adj[b][d]=adj[d][b]=1;
+            int ok = connected();
+            if (ok){ int sm = m; int seu[128], sev[128]; memcpy(seu, eu, sizeof eu); memcpy(sev, ev, sizeof ev);
+                rebuild_edges(); int nge, niv; eval(&nge, &niv); double nf = -ENERGY;
+                if (nf > bestf){ bestf = nf; ba=a; bb=b; bc=c; bd=d; }
+                if (ENERGY < 0){ load_vertex_graph(); int g_le = exists_le(nge, 0); int ival = exact_min(nge + 1, 1);
+                    printf("FOUND D=%d n=%d ge=%d i=%d gamma<=ge:%s ", D, n, nge, ival, g_le ? "yes" : "NO"); print_g6(stdout); fflush(stdout); return 0; }
+                m = sm; memcpy(eu, seu, sizeof eu); memcpy(ev, sev, sizeof ev); }
+            adj[a][c]=adj[c][a]=0; adj[b][d]=adj[d][b]=0; adj[a][b]=adj[b][a]=1; adj[c][d]=adj[d][c]=1;
+        }
+        if (ba < 0) break;
+        adj[ba][bb]=adj[bb][ba]=0; adj[bc][bd]=adj[bd][bc]=0; adj[ba][bc]=adj[bc][ba]=1; adj[bb][bd]=adj[bd][bb]=1;
+        rebuild_edges(); { int nge, niv; eval(&nge, &niv); f = -ENERGY; ge = nge; iv = niv; }
+        fprintf(stderr, "descent round %d E=%.3f (ge=%d i=%d count=%d)\n", round, -f, ge, IVAL, iv);
+        if (f > best){ best = f; if (BESTFILE[0]) { FILE *bf = fopen(BESTFILE, "w"); if (bf) { fprintf(bf, "E=%.4f ge=%d i=%d count=%d\n", -f, ge, IVAL, iv); print_g6(bf); fclose(bf); } } }
+    }
+    fprintf(stderr, "end best logcount=%g\n", -best);
+    return 0;
+}
