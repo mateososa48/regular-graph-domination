@@ -214,6 +214,8 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    local configurations (`beta_anneal.py`, `beta_anneal_general.py`) never finds more than 33/64 ≈ 0.516 for
    Δ = 4. If that is the true worst case, the count gives 22 clauses (51 vertices), but I have not proved it.
    This per-clause count cannot reach 23 clauses for Δ = 4, because configurations above 10/22 exist.
+   I have not found this argument in the literature, but it is elementary and may well be known in some form;
+   the new part here is combining it with the literal bound and Gupta's reduction.
 
    `flip_bound.py` checks the second step by brute force on random unsatisfiable formulas, checks the bound on
    B_C on random literal-bounded formulas, and recomputes the clause bounds and vertex ranges. One side fact
