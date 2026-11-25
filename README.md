@@ -156,9 +156,8 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    kind with 17 clauses, setting a variable x false leaves Kraft sum (17 + p − q)/16, where p and q count the
    positive and negative occurrences of x. If q = p + 1 this is exactly 1, so the restricted formula would have
    to tile its half-cube, which the same clash count rules out (a 3-clause clashes with at most 9 others). Hence
-   every variable occurs equally often with each sign. Excluding 17 clauses altogether would extend Δ = 4 to
-   n ≤ 41, and each further clause adds about two vertices; I did not manage that (an exact SAT search is too
-   weak at this kind of counting).
+   every variable occurs equally often with each sign. Item 8 below excludes 17 clauses altogether, which
+   extends Δ = 4 to n ≤ 41; each further clause adds about two vertices.
 
 8. **No unsatisfiable (4,3,3)-formula has fewer than 18 clauses (new, short proof).** For a CNF F on n
    variables let N(x) be the number of clauses falsified by the assignment x. If F is unsatisfiable then
@@ -175,9 +174,33 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    of item 7 every unsatisfiable formula of this kind has at least 18 clauses. **Consequence: Baste's
    inequality holds for every 4-regular graph on at most 41 vertices.** The same argument gives at least
    2^Δ + 2 clauses for Δ = 5 and 6 (no change to those ranges), and it only needs the low degree, so it also
-   applies to formulas with repeated clauses. Pushing it to 18 clauses would need control of points where
-   three or more clauses fail at once; the first cases (h ≤ 2, or a variable with unequal sign counts)
-   can be ruled out the same way, but I have not closed the rest.
+   applies to formulas with repeated clauses. With 18 clauses the count no longer closes, because h may
+   then take the value 2 (three clauses failing at one point); item 9 collects what I could prove there.
+
+9. **Partial results for 18 clauses.** Suppose an unsatisfiable (4,3,3)-formula had exactly 18 clauses. Two
+   facts follow, but I have not finished the case:
+   - *Every variable occurs equally often with each sign.* Say x occurs p times positively and q < p times
+     negatively (the other case is symmetric) and set x true. The remaining clauses, q of them shortened to
+     width 3, have weight Σ 2^(−width) = (18 − p + q)/16. If p − q ≥ 3 this is below 1, so the restriction is
+     satisfiable. If p − q = 2 it is exactly 1, so the remaining clauses would tile the half-cube and every two
+     of them would clash, but a remaining width-4 clause has at least 14 others and clashes with at most 12.
+     If p = 1 and q = 0 the restriction is a 17-clause formula of the same kind, excluded by item 8. If
+     p − q = 1 and p ≥ 2 the weight is 17/16, the degree argument of item 8 makes the restricted h 0/1, and its
+     second moment is then exactly 2/16 = 32/256, while the non-clashing pairs among the remaining clauses
+     already contribute at least 46/256 (p = 3) or 57/256 (p = 2).
+   - *No three clauses use pairwise disjoint sets of variables, unless another clause uses one of those three
+     variable sets too.* Restrict to the assignments where, for each of the three clauses, the parity of its
+     four variables differs from the parity at which that clause fails. Those three clauses are then never
+     falsified. The three parity conditions involve disjoint 4-sets and no combination of them fits inside a
+     different 4-set, so the values on any other clause's variables stay uniformly distributed and that
+     clause is still falsified with probability exactly 1/16. The average of N over these assignments is
+     therefore 15/16 < 1, and one of them satisfies the formula. This part needs no bound on literal
+     occurrences: an unsatisfiable 4-CNF with m clauses has at most m − 16 pairwise variable-disjoint clauses
+     whose variable sets no other clause uses.
+
+   Excluding 18 clauses would extend Δ = 4 to n ≤ 44. `fourier_checks.py` checks the two counting identities
+   behind items 8 and 9 (the second moment as a sum over non-clashing pairs, and the average over a parity
+   set) by brute force on random formulas.
 
 ## Honest assessment
 
@@ -197,8 +220,8 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
   is tree-like (deficiency 1), so by Lemma 2 it must contain a literal occurring 4 or more times, and no
   rebalancing within that class can help. Zhang–Peitl–Szeider's 235-clause version adds a 7-clause
   non-tree axiom; I did not check its literal counts.
-- **Where Δ = 4 now stands:** by Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5
-  exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
+- **Where Δ = 4 now stands:** an unsatisfiable (4,3,3)-formula needs at least 18 clauses (item 8), and by
+  Lemma 1 it is enough to decide whether an unsatisfiable block with D ≤ 5 exists. Lemma 2 and the near miss show that tree-like blocks and the natural NAE-cycle blocks miss by 2 and
   by 1. No block appeared in any search, but the searches only reach about 17 variables, and the 3-CNF
   experience (smallest objects much larger than the counting bound) says small searches prove little.
 
@@ -220,6 +243,7 @@ python3 compose_blocks.py                            # Lemma 1 composition, test
 python3 cegar_sym2.py 5 2 3,4,4 3                    # symmetric exact search: "NO BLOCK" for Z5, 10 variables
 python3 shearer_block.py                             # local lemma ratios
 python3 ranges.py                                    # vertex ranges where the reduction is guaranteed to work
+python3 fourier_checks.py                            # brute-force check of the identities in items 8 and 9
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run
