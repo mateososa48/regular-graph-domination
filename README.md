@@ -130,9 +130,13 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
        n = 11, 13, 15, 17; a 2-clause and three 3-clauses: 39, 227, 684 at n = 11, 14, 17; two 2-clauses and a
        3-clause: 24, 117 at n = 11, 14. With exactly three 3-clauses: 205 to 1,897 models at n = 12 to 16.
      - Exact counterexample-guided search over blocks with a cyclic symmetry (the short clauses forming one
-       orbit), `cegar_sym2.py`: no Z₅-symmetric block with 10 variables and 15 clauses, no Z₄-symmetric block
-       with 12 variables and 16 clauses. Larger symmetric cases (up to 30 variables) were still running on the
-       Mac when this was written.
+       orbit), `cegar_sym2.py`: no Z₅-symmetric block with 10 variables and 15 clauses, none with 15 variables
+       and 20 clauses, and no Z₄-symmetric block with 12 variables and 16 clauses. Larger symmetric cases (up to
+       30 variables) were still running on the Mac when this was written.
+     - Circulant (4,3,3)-formulas with two variable orbits and three clause orbits (every literal exactly 3
+       times) are all satisfiable, for an easy reason: on assignments that are constant on each orbit the
+       formula collapses to three clauses over two orbit-variables, which cannot be unsatisfiable. The same
+       "quotient" argument explains why symmetric searches need many orbits.
 
 7. **Slightly larger verified ranges for degrees 4, 5, 6 (rigorous, elementary).** Gupta's reduction succeeds
    whenever the formula it produces is satisfiable. He guarantees this when the formula has at most 2^Δ − 1
