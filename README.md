@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; item 7 below extends this to 40 / 76 / 142) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; item 7 below extends this to 40 / 76 / 145) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -139,10 +139,16 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    clauses (union bound). One more clause is free: an unsatisfiable formula with exactly 2^Δ clauses of width Δ
    would need its falsified subcubes to tile the cube exactly, so every two clauses would clash. But with every
    literal occurring at most Δ − 1 times, a clause clashes with at most Δ(Δ − 1) others, and
-   Δ(Δ − 1) < 2^Δ − 1 for Δ ≥ 4. With the integer form of Gupta's bound |M| ≥ ⌈Δn/(4Δ − 2)⌉ this gives
-   **Δ = 4: all graphs with n ≤ 40 (was 37); Δ = 5: n ≤ 76 (was 70); Δ = 6: n ≤ 142 (was 140)**
-   (`ranges.py` reproduces Gupta's 48 / 37 / 70 and computes the new values; for Δ = 6 the union bound alone
-   already gives 141 with exact rounding). A further observation for Δ = 4: in an unsatisfiable formula of this
+   Δ(Δ − 1) < 2^Δ − 1 for Δ ≥ 4. For Δ = 6 one more clause is free: restrict a 65-clause formula to the 6
+   variables of any clause C. The 64 restricted Kraft sums add up to 65 and are each ≥ 1. The restriction that
+   falsifies C contains the empty clause and at least 34 surviving clauses, so it exceeds 1 by ≥ 34/64. Every
+   other restriction keeps ≥ 35 clauses that each clash with ≤ 30 others, so it cannot tile and exceeds 1 by
+   ≥ 1/64. That totals ≥ 97/64 > 1, a contradiction. With the integer form of Gupta's bound
+   |M| ≥ ⌈Δn/(4Δ − 2)⌉ this gives **Δ = 4: all graphs with n ≤ 40 (was 37); Δ = 5: n ≤ 76 (was 70);
+   Δ = 6: n ≤ 145 (was 140)** (`ranges.py` reproduces Gupta's 48 / 37 / 70 and computes the new values; for
+   Δ = 6 the union bound alone already gives 141 with exact rounding). The same restriction trick does not
+   settle 17 clauses for Δ = 4 or 33 for Δ = 5, because there the restricted formulas are small enough that
+   tiling cannot be ruled out by counting. A further observation for Δ = 4: in an unsatisfiable formula of this
    kind with 17 clauses, setting a variable x false leaves Kraft sum (17 + p − q)/16, where p and q count the
    positive and negative occurrences of x. If q = p + 1 this is exactly 1, so the restricted formula would have
    to tile its half-cube, which the same clash count rules out (a 3-clause clashes with at most 9 others). Hence
