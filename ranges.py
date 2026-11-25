@@ -26,8 +26,8 @@ guaranteed when it has fewer clauses than the smallest unsatisfiable formula of 
   one-flip count (README item 9, supersedes the three lines above for Delta = 4, 5, 6):
                               at least (2 - m/2^Delta) 2^n assignments falsify exactly one clause C, each
                               lies in the set B_C where every flip of a variable of C is blocked, and
-                              |B_C| <= b 2^(n-Delta) with b = 5/8, 11/16, 5/8.  So m >= 2^(Delta+1)/(1+b):
-                              every such formula with <= 19 / 37 / 78 clauses is satisfiable.
+                              |B_C| <= b 2^(n-Delta) with b = 5/8, 17/32, 7/16.  So m >= 2^(Delta+1)/(1+b):
+                              every such formula with <= 19 / 41 / 89 clauses is satisfiable.
   Delta = 3: Zhang-Peitl-Szeider's exact value 20 (formulas with <= 19 clauses are satisfiable)
 """
 from math import ceil
@@ -44,6 +44,6 @@ def max_safe_n(delta, max_sat_clauses, n_limit=2000):
             return best
     return best
 
-for delta, gupta, ours in [(3, 19, 19), (4, 15, 19), (5, 31, 37), (6, 63, 78)]:
+for delta, gupta, ours in [(3, 19, 19), (4, 15, 19), (5, 31, 41), (6, 63, 89)]:
     print(f"Delta={delta}: union bound -> n <= {max_safe_n(delta, gupta)};  "
           f"this log -> n <= {max_safe_n(delta, ours)}")

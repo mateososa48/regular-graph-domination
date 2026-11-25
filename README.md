@@ -16,7 +16,7 @@ independent domination number. Since γ ≤ i, a counterexample to Baste is also
 |---|---|
 | 1–2 | true (trivial) |
 | 3 | **false**: a 50-vertex cubic graph with i = γ = 16 > 15 = γₑ (Zenodo 10.5281/zenodo.21852504 for i; Afrasyab, arXiv:2609.10783 for γ) |
-| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 47 / 84 / 174) |
+| 4, 5, 6 | **open** (Gupta, arXiv:2608.22498, settles γ ≤ γₑ up to 37 / 70 / 140 vertices; items 7–9 below extend this to 47 / 94 / 197) |
 | ≥ 7 | γ ≤ γₑ true (Gupta, Lovász Local Lemma). TxGraffiti's i ≤ γₑ: not settled |
 
 ## What was done and what came out
@@ -177,7 +177,7 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
    applies to formulas with repeated clauses. With 18 clauses the count no longer closes, because h may
    then take the value 2 (three clauses failing at one point). Item 9 gets past this with a different count.
 
-9. **A one-flip count: unsatisfiable formulas of this kind need at least 20 / 38 / 79 clauses for Δ = 4 / 5 / 6
+9. **A one-flip count: unsatisfiable formulas of this kind need at least 20 / 42 / 90 clauses for Δ = 4 / 5 / 6
    (new).** This supersedes the clause bounds of items 7 and 8. Let F be an unsatisfiable Δ-CNF in which every
    literal occurs at most Δ − 1 times, with m clauses, and let N(x) count the clauses falsified by x.
    - *Many assignments falsify exactly one clause.* N ≥ 1 everywhere, so at most Σ (N − 1) = (m/2^Δ − 1)·2^n
@@ -189,32 +189,31 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
      falsify C and at which all Δ variables of C are blocked, and #{N = 1} ≤ Σ_C |B_C|.
    - *B_C is a small part of the 2^(n−Δ) assignments falsifying C.* A blocker D of v clashes with C only at v
      (a second clash would make D true wherever C is false). It consists of the opposite literal on v, some j
-     literals of C and Δ − 1 − j other literals, so when C is false it is active with probability
-     2^(j−(Δ−1)). At most Δ − 1 clauses contain the opposite literal on v. Each literal of C occurs in at most
-     Δ − 2 clauses besides C, so the blockers of all Δ variables together use at most Δ(Δ − 2) occurrences of literals
-     of C, and some variable of C has blockers using at most Δ − 2 of them. By convexity its blockers are active with
-     probability at most 1/2 + (Δ − 2)/2^(Δ−1) (one blocker sharing Δ − 2 literals with C, the rest sharing
-     none). Hence |B_C| ≤ b·2^(n−Δ) with b = 1/2 + (Δ − 2)/2^(Δ−1), which is 3/4, 11/16 and 5/8 for Δ = 4, 5, 6.
-   - Combining: (2 − m/2^Δ)·2^n ≤ m·b·2^(n−Δ), so m ≥ 2^(Δ+1)/(1 + b). This gives m ≥ 38 for Δ = 5 and m ≥ 79
-     for Δ = 6. For Δ = 4 it gives m ≥ 19, and a short case analysis (below) improves b to 5/8 and m to 20.
+     literals of C and Δ − 1 − j free literals, so when C is false it is active with probability
+     2^(j−(Δ−1)). At most Δ − 1 clauses contain the opposite literal on v, and each literal of C occurs in at
+     most Δ − 2 clauses besides C. So if u_v counts the literals of C used by the blockers of v, then
+     Σ_v u_v ≤ Δ(Δ − 2). There are three cases; the union bound and the convexity of 2^j do the work.
+     (i) Some u_v ≤ Δ − 3. Then v's blockers are active with probability ≤ 1/4 + (Δ − 2)/2^(Δ−1).
+     (ii) Every u_v = Δ − 2, but some v has no *main* blocker (one sharing Δ − 2 literals with C). Then v's
+     blockers are active with probability ≤ 1/4 + 1/2^(Δ−2) + (Δ − 3)/2^(Δ−1).
+     (iii) Every v has a main blocker, whose single free literal f_v I call v's main literal, plus at most
+     Δ − 2 residual blockers that share nothing with C. If two main literals are complementary, the two
+     variables are blocked together only where one of their residual blockers is active, probability
+     ≤ 2(Δ − 2)/2^(Δ−1). Otherwise let f be a main literal shared by as many variables as possible, say t of
+     them, and condition on f. If f is false, some variable w with a different main literal has no blocker
+     containing f (f has at most Δ − 1 − t further occurrences, and there are Δ − t such variables), and w
+     must still be blocked: probability ≤ 1/4 + (Δ − 2)/2^Δ. If f is true, a variable with main literal f
+     must be blocked by a residual blocker: probability ≤ (Δ − 2)/2^(Δ−1). Together ≤ 1/4 + 3(Δ − 2)/2^Δ.
+     The largest of these bounds is b = 5/8, 17/32, 7/16 for Δ = 4, 5, 6, so |B_C| ≤ b·2^(n−Δ).
+   - *Combining:* (2 − m/2^Δ)·2^n ≤ m·b·2^(n−Δ), so m ≥ 2^(Δ+1)/(1 + b), which gives m ≥ 20, 42, 90.
 
    **Consequence: Baste's inequality holds for all 4-regular graphs on at most 47 vertices, all 5-regular graphs
-   on at most 84 vertices and all 6-regular graphs on at most 174 vertices** (Gupta: 37 / 70 / 140; `ranges.py`).
+   on at most 94 vertices and all 6-regular graphs on at most 197 vertices** (Gupta: 37 / 70 / 140; `ranges.py`).
 
-   *The Δ = 4 case analysis.* Write u_v for the number of literals of C used by the blockers of v, so
-   Σ u_v ≤ 8. If some u_v ≤ 1, the blockers of v are active with probability at most 1/4 + 1/8 + 1/8 = 1/2.
-   Otherwise every u_v = 2, and the union bound gives 5/8 unless every variable of C has the pattern "a main
-   blocker sharing two literals of C plus two residual blockers sharing none". Then each variable v has a main
-   blocker with a single free literal f_v (active iff f_v is false) and two residual blockers with three free
-   literals each. If two main literals are complementary, two variables are blocked together only where one of
-   their four residual blockers is active, probability ≤ 4/8. Otherwise let f be a main literal shared by as
-   many variables as possible, and condition on f. If f is false, some variable w with a different main literal
-   whose residual blockers avoid f must be blocked (if t variables have main literal f, f has at most 3 − t
-   further occurrences, too few to reach all 4 − t other variables); that has probability ≤ 1/4 + 2/16 = 3/8. If f is true, a variable with main literal f must be blocked by a residual blocker,
-   probability ≤ 2/8, and ≤ 1/8 + 1/16 when two or three variables share f (the complement of f occurs at most
-   3 times, so one of them has at most one residual blocker containing it). In all cases |B_C| ≤ (5/8)·2^(n−4).
-   An annealing search over these local configurations (`beta_anneal.py`) finds at most 33/64 ≈ 0.516. If that
-   is the true worst case, the same count gives 22 clauses for Δ = 4 (51 vertices), but I have not proved it.
+   For Δ = 4, cases (ii) and (iii) both reach 5/8, so both would need sharpening. An annealing search over the
+   local configurations (`beta_anneal.py`, `beta_anneal_general.py`) never finds more than 33/64 ≈ 0.516 for
+   Δ = 4. If that is the true worst case, the count gives 22 clauses (51 vertices), but I have not proved it.
+   This per-clause count cannot reach 23 clauses for Δ = 4, because configurations above 10/22 exist.
 
    `flip_bound.py` checks the second step by brute force on random unsatisfiable formulas, checks the bound on
    B_C on random literal-bounded formulas, and recomputes the clause bounds and vertex ranges. One side fact
@@ -267,7 +266,8 @@ python3 shearer_block.py                             # local lemma ratios
 python3 ranges.py                                    # vertex ranges where the reduction is guaranteed to work
 python3 fourier_checks.py                            # brute-force check of the identities in items 8 and 9
 python3 flip_bound.py                                # checks for the one-flip count, new clause bounds and ranges
-python3 beta_anneal.py 8 11 30000 10                 # adversarial search for large B_C (finds 33/64)
+python3 beta_anneal.py 8 11 30000 10                 # adversarial search for large B_C, degree 4 (finds 33/64)
+python3 beta_anneal_general.py 5 9 3 25000 6         # the same for any degree D (here D = 5)
 ```
 
 `EdgeDomBugDemo.lean`: copy into a checkout of google-deepmind/formal-conjectures, run

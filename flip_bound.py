@@ -8,7 +8,7 @@ Step 2. If N(x) = 1 with C the falsified clause, flipping any variable v of C mu
         a clause D containing the complement of C's literal on v whose other literals are
         false at x ("v is blocked at x").  So x lies in B_C = {x in Q_C : every variable of
         C is blocked}, where Q_C is the set of assignments falsifying C.
-Step 3. beta_C = |B_C| / |Q_C| <= 1/2 + (k-2)/2^(k-1)  (and <= 5/8 for k = 4).
+Step 3. beta_C = |B_C| / |Q_C| <= 5/8, 17/32, 7/16 for k = 4, 5, 6 (README item 9).
 Together: m * beta / 2^k >= 2 - m/2^k, i.e. m >= 2^(k+1) / (1 + beta).
 
 This script checks Step 2 by brute force on random unsatisfiable formulas (no literal
@@ -102,7 +102,7 @@ def check_step2(rng, trials=40):
 def main():
     rng = random.Random(7)
     print("Step 2 (inclusion N=1 points in B_C) verified on", check_step2(rng), "random unsatisfiable 4-CNFs")
-    bounds = {4: Fr(5, 8), 5: Fr(1, 2) + Fr(3, 16), 6: Fr(1, 2) + Fr(4, 32)}
+    bounds = {4: Fr(5, 8), 5: Fr(17, 32), 6: Fr(7, 16)}
     for k, b in bounds.items():
         worst = Fr(0)
         for _ in range({4: 400, 5: 150, 6: 60}[k]):
