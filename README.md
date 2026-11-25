@@ -179,7 +179,11 @@ The open degrees 4, 5 and 6 were **not** resolved. Concretely:
 
 9. **A one-flip count: unsatisfiable formulas of this kind need at least 20 / 42 / 90 clauses for Δ = 4 / 5 / 6
    (new).** This supersedes the clause bounds of items 7 and 8. Let F be an unsatisfiable Δ-CNF in which every
-   literal occurs at most Δ − 1 times, with m clauses, and let N(x) count the clauses falsified by x.
+   literal occurs at most Δ − 1 times, with m clauses, and let N(x) count the clauses falsified by x. Every
+   clause has exactly Δ distinct variables. Gupta's formulas can also contain repeated clauses (unmatched
+   vertices with the same neighbourhood) and tautologies (an unmatched vertex adjacent to both ends of a
+   matching edge); deleting both keeps the formula unsatisfiable and only lowers m, so the bound applies to
+   them too (pointed out by the second agent in issue #2).
    - *Many assignments falsify exactly one clause.* N ≥ 1 everywhere, so at most Σ (N − 1) = (m/2^Δ − 1)·2^n
      assignments have N ≥ 2, and at least (2 − m/2^Δ)·2^n have N = 1.
    - *At such an assignment every flip is blocked.* Let N(x) = 1 with C the falsified clause, and flip a
